@@ -5,6 +5,8 @@ from mlagents.trainers.torch.layers import linear_layer, Initialization, Swish
 from mlagents.torch_utils import torch, nn
 from mlagents.trainers.torch.model_serialization import exporting_to_onnx
 
+from torchvision import transforms
+
 
 class Normalizer(nn.Module):
     def __init__(self, vec_obs_size: int):
@@ -152,10 +154,15 @@ class SimpleVisualEncoder(nn.Module):
         self, height: int, width: int, initial_channels: int, output_size: int
     ):
         super().__init__()
-        self.h_size = output_size
+        self.h_size = output_size # this is the final output size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
         conv_2_hw = conv_output_shape(conv_1_hw, 4, 2)
-        self.final_flat = conv_2_hw[0] * conv_2_hw[1] * 32
+        self.final_flat = 1280 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
+
+        # Load the pretrained MobileNet v2 model
+        self.mobilenetv2 = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
+        # Set the last classifier as empty (the output dimension should be )
+        self.mobilenetv2.classifier = nn.Identity()
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -163,6 +170,7 @@ class SimpleVisualEncoder(nn.Module):
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
             nn.LeakyReLU(),
         )
+
         self.dense = nn.Sequential(
             linear_layer(
                 self.final_flat,
@@ -175,8 +183,12 @@ class SimpleVisualEncoder(nn.Module):
 
     def forward(self, visual_obs: torch.Tensor) -> torch.Tensor:
         if not exporting_to_onnx.is_exporting():
-            visual_obs = visual_obs.permute([0, 3, 1, 2])
-        hidden = self.conv_layers(visual_obs)
+            visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
+
+        # TODO: preprocess the image
+
+        # hidden = self.conv_layers(visual_obs)
+        hidden = self.mobilenetv2(visual_obs) if visual_obs.shape[1]==3 else self.conv_layers(visual_obs) # use pretrained mobilenet v2 for color images
         hidden = hidden.reshape(-1, self.final_flat)
         return self.dense(hidden)
 
