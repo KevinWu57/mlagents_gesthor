@@ -186,9 +186,14 @@ class SimpleVisualEncoder(nn.Module):
             visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
 
         # TODO: preprocess the image
+        # TODO: server cannot output visual observation
 
         # hidden = self.conv_layers(visual_obs)
-        hidden = self.mobilenetv2(visual_obs) if visual_obs.shape[1]==3 else self.conv_layers(visual_obs) # use pretrained mobilenet v2 for color images
+        if visual_obs.shape[1]==3:
+            with torch.no_grad():
+                hidden = self.mobilenetv2(visual_obs)
+        else:
+            hidden = self.conv_layers(visual_obs)
         hidden = hidden.reshape(-1, self.final_flat)
         return self.dense(hidden)
 
