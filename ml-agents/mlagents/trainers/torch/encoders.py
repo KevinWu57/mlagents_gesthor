@@ -185,6 +185,8 @@ class SimpleVisualEncoder(nn.Module):
         if not exporting_to_onnx.is_exporting():
             visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
 
+        print(visual_obs[0][0][0][0])
+
         # TODO: preprocess the image
 
         # hidden = self.conv_layers(visual_obs)
