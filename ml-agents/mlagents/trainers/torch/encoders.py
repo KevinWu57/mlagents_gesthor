@@ -157,7 +157,7 @@ class SimpleVisualEncoder(nn.Module):
         self.h_size = output_size # this is the final output size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
         conv_2_hw = conv_output_shape(conv_1_hw, 4, 2)
-        self.final_flat = 1280 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
+        self.final_flat = 512 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
         self.mobilenetv2 = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
@@ -169,9 +169,9 @@ class SimpleVisualEncoder(nn.Module):
             param.requires_grad = False
         # Replace the classifier layer with a fc layer
         self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
-        # # Use multiple GPUs if possible
-        # if torch.cuda.device_count() > 1:
-        #     self.mobilenetv2 = nn.DataParallel(self.mobilenetv2)
+        # Use multiple GPUs if possible
+        if torch.cuda.device_count() > 1:
+            self.mobilenetv2 = nn.DataParallel(self.mobilenetv2)
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),

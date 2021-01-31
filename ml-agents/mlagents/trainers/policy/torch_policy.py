@@ -85,7 +85,7 @@ class TorchPolicy(Policy):
         # m_size needed for training is determined by network, not trainer settings
         self.m_size = self.actor_critic.memory_size
 
-        # Use multiple GPUs if possible
+        # Use multiple GPUs if possible TODO: this will cause an error at line 138
         if torch.cuda.device_count() > 1:
             self.actor_critic = torch.nn.DataParallel(self.actor_critic)
         self.actor_critic.to(default_device())
