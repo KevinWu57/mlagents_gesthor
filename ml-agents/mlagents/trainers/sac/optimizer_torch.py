@@ -204,7 +204,7 @@ class TorchSACOptimizer(TorchOptimizer):
         )
         self._move_to_device(default_device())
 
-    # TODO: I am not sure if this is the correct way to use multiple GPUs in mlagents
+    # TODO: I am not sure if this is the correct way to use multiple GPUs in mlagents; well, this is just for SAC
     def _move_to_device(self, device: torch.device) -> None:
         # use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
