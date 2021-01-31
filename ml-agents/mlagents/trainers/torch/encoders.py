@@ -182,7 +182,7 @@ class SimpleVisualEncoder(nn.Module):
                 self.final_flat,
                 self.h_size,
                 kernel_init=Initialization.KaimingHeNormal,
-                kernel_gain=1.41,  # Use ReLU gain
+                kernel_gain= 1.41,  # Use ReLU gain
             ),
             nn.LeakyReLU(),
         )
