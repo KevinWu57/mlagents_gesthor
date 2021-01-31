@@ -171,7 +171,7 @@ class SimpleVisualEncoder(nn.Module):
         self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
         # Use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
-            self.mobilenetv2 = nn.DataParallel(self.mobilenetv2)
+            self.mobilenetv2 = nn.DistributedDataParallel(self.mobilenetv2)
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
