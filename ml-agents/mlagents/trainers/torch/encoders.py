@@ -161,8 +161,14 @@ class SimpleVisualEncoder(nn.Module):
 
         # Load the pretrained MobileNet v2 model
         self.mobilenetv2 = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
-        # Set the last classifier as empty (the output dimension should be )
-        self.mobilenetv2.classifier = nn.Identity()
+        # # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
+        # self.mobilenetv2.classifier = nn.Identity()
+
+        # Freeze all parameters in the model
+        for param in self.mobilenetv2.parameters():
+            param.requires_grad = False
+        # Replace the classifier layer with a fc layer
+        self.classifier[1] = nn.Linear(1280, 512)
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -186,12 +192,10 @@ class SimpleVisualEncoder(nn.Module):
             visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
 
         # TODO: preprocess the image
-        # TODO: server cannot output visual observation
 
         # hidden = self.conv_layers(visual_obs)
         if visual_obs.shape[1]==3:
-            with torch.no_grad():
-                hidden = self.mobilenetv2(visual_obs)
+            hidden = self.mobilenetv2(visual_obs)
         else:
             hidden = self.conv_layers(visual_obs)
         hidden = hidden.reshape(-1, self.final_flat)
