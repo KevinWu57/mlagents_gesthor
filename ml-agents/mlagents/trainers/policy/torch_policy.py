@@ -86,8 +86,8 @@ class TorchPolicy(Policy):
         self.m_size = self.actor_critic.memory_size
 
         # Use multiple GPUs if possible TODO: this will cause an error at line 138
-        if torch.cuda.device_count() > 1:
-            self.actor_critic = torch.nn.DataParallel(self.actor_critic)
+        # if torch.cuda.device_count() > 1:
+        #     self.actor_critic = torch.nn.DataParallel(self.actor_critic)
         self.actor_critic.to(default_device())
         self._clip_action = not tanh_squash
 
