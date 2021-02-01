@@ -204,7 +204,7 @@ class SimpleVisualEncoder(nn.Module):
             # normalize the input tensor
             transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             visual_obs = transform(visual_obs)
-            hidden = self.mobilenetv2.module(visual_obs)
+            hidden = self.mobilenetv2(visual_obs)
         else:
             hidden = self.conv_layers(visual_obs)
         hidden = hidden.reshape(-1, self.final_flat)
