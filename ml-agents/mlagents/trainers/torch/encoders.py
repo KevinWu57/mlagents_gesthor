@@ -170,8 +170,8 @@ class SimpleVisualEncoder(nn.Module):
         # Replace the classifier layer with a fc layer
         self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
         # Use multiple GPUs if possible
-        # if torch.cuda.device_count() > 1:
-        #     self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
+        if torch.cuda.device_count() > 1:
+            self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -204,7 +204,7 @@ class SimpleVisualEncoder(nn.Module):
             # normalize the input tensor
             transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             visual_obs = transform(visual_obs)
-            hidden = self.mobilenetv2(visual_obs)
+            hidden = self.mobilenetv2.module(visual_obs)
         else:
             hidden = self.conv_layers(visual_obs)
         hidden = hidden.reshape(-1, self.final_flat)
