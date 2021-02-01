@@ -172,6 +172,7 @@ class SimpleVisualEncoder(nn.Module):
         # Use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
             self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
+            self.mobilenetv2.train()
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -193,8 +194,6 @@ class SimpleVisualEncoder(nn.Module):
     def forward(self, visual_obs: torch.Tensor) -> torch.Tensor:
         if not exporting_to_onnx.is_exporting():
             visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
-
-        # TODO: preprocess the image
 
         # hidden = self.conv_layers(visual_obs)
 
