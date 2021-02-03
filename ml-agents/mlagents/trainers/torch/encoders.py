@@ -5,6 +5,8 @@ from mlagents.trainers.torch.layers import linear_layer, Initialization, Swish
 from mlagents.torch_utils import torch, nn
 from mlagents.trainers.torch.model_serialization import exporting_to_onnx
 
+from torchvision import transforms
+
 
 class Normalizer(nn.Module):
     def __init__(self, vec_obs_size: int):
@@ -143,19 +145,33 @@ class SmallVisualEncoder(nn.Module):
         if not exporting_to_onnx.is_exporting():
             visual_obs = visual_obs.permute([0, 3, 1, 2])
         hidden = self.conv_layers(visual_obs)
-        hidden = torch.reshape(hidden, (-1, self.final_flat))
+        hidden = hidden.reshape(-1, self.final_flat)
         return self.dense(hidden)
 
-
+# TODO: add one additional visual encoder instead of modifying on this one
 class SimpleVisualEncoder(nn.Module):
     def __init__(
         self, height: int, width: int, initial_channels: int, output_size: int
     ):
         super().__init__()
-        self.h_size = output_size
+        self.h_size = output_size # this is the final output size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
         conv_2_hw = conv_output_shape(conv_1_hw, 4, 2)
-        self.final_flat = conv_2_hw[0] * conv_2_hw[1] * 32
+        self.final_flat = 512 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
+
+        # Load the pretrained MobileNet v2 model
+        self.mobilenetv2 = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
+        # # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
+        # self.mobilenetv2.classifier = nn.Identity()
+
+        # Freeze all parameters in the model
+        for param in self.mobilenetv2.parameters():
+            param.requires_grad = False
+        # Replace the classifier layer with a fc layer
+        self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
+        # Use multiple GPUs if possible
+        if torch.cuda.device_count() > 1:
+            self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -168,16 +184,27 @@ class SimpleVisualEncoder(nn.Module):
                 self.final_flat,
                 self.h_size,
                 kernel_init=Initialization.KaimingHeNormal,
-                kernel_gain=1.41,  # Use ReLU gain
+                kernel_gain= 1.41,  # Use ReLU gain
             ),
             nn.LeakyReLU(),
         )
 
     def forward(self, visual_obs: torch.Tensor) -> torch.Tensor:
         if not exporting_to_onnx.is_exporting():
-            visual_obs = visual_obs.permute([0, 3, 1, 2])
-        hidden = self.conv_layers(visual_obs)
-        hidden = torch.reshape(hidden, (-1, self.final_flat))
+            visual_obs = visual_obs.permute([0, 3, 1, 2]) # permute the dimensions to match the input for conv_layers
+
+        # hidden = self.conv_layers(visual_obs)
+
+        # Only use MobileNet for color images (i.e., images with 3 channels)
+        # Depth images will use the default simple network
+        if visual_obs.shape[1]==3:
+            # normalize the input tensor
+            transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            visual_obs = transform(visual_obs)
+            hidden = self.mobilenetv2(visual_obs)
+        else:
+            hidden = self.conv_layers(visual_obs)
+        hidden = hidden.reshape(-1, self.final_flat)
         return self.dense(hidden)
 
 

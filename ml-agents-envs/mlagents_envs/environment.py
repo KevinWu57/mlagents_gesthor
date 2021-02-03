@@ -177,7 +177,11 @@ class UnityEnvironment(BaseEnv):
         # If true, this means the environment was successfully loaded
         self._loaded = False
         # The process that is started. If None, no process was started
+<<<<<<< HEAD
         self._proc1 = None
+=======
+        self._process: Optional[subprocess.Popen] = None
+>>>>>>> tmp
         self._timeout_wait: int = timeout_wait
         self._communicator = self._get_communicator(worker_id, base_port, timeout_wait)
         self._worker_id = worker_id
@@ -194,7 +198,11 @@ class UnityEnvironment(BaseEnv):
             )
         if file_name is not None:
             try:
+<<<<<<< HEAD
                 self._proc1 = env_utils.launch_executable(
+=======
+                self._process = env_utils.launch_executable(
+>>>>>>> tmp
                     file_name, self._executable_args()
                 )
             except UnityEnvironmentException:
@@ -249,7 +257,15 @@ class UnityEnvironment(BaseEnv):
         if self._no_graphics:
             args += ["-nographics", "-batchmode"]
         args += [UnityEnvironment._PORT_COMMAND_LINE_ARG, str(self._port)]
+<<<<<<< HEAD
         if self._log_folder:
+=======
+
+        # If the logfile arg isn't already set in the env args,
+        # try to set it to an output directory
+        logfile_set = "-logfile" in (arg.lower() for arg in self._additional_args)
+        if self._log_folder and not logfile_set:
+>>>>>>> tmp
             log_file_path = os.path.join(
                 self._log_folder, f"Player-{self._worker_id}.log"
             )
@@ -289,7 +305,13 @@ class UnityEnvironment(BaseEnv):
 
     def reset(self) -> None:
         if self._loaded:
+<<<<<<< HEAD
             outputs = self._communicator.exchange(self._generate_reset_input())
+=======
+            outputs = self._communicator.exchange(
+                self._generate_reset_input(), self._poll_process
+            )
+>>>>>>> tmp
             if outputs is None:
                 raise UnityCommunicatorStoppedException("Communicator has exited.")
             self._update_behavior_specs(outputs)
@@ -317,7 +339,11 @@ class UnityEnvironment(BaseEnv):
                 ].action_spec.empty_action(n_agents)
         step_input = self._generate_step_input(self._env_actions)
         with hierarchical_timer("communicator.exchange"):
+<<<<<<< HEAD
             outputs = self._communicator.exchange(step_input)
+=======
+            outputs = self._communicator.exchange(step_input, self._poll_process)
+>>>>>>> tmp
         if outputs is None:
             raise UnityCommunicatorStoppedException("Communicator has exited.")
         self._update_behavior_specs(outputs)
@@ -377,6 +403,21 @@ class UnityEnvironment(BaseEnv):
         self._assert_behavior_exists(behavior_name)
         return self._env_state[behavior_name]
 
+<<<<<<< HEAD
+=======
+    def _poll_process(self) -> None:
+        """
+        Check the status of the subprocess. If it has exited, raise a UnityEnvironmentException
+        :return: None
+        """
+        if not self._process:
+            return
+        poll_res = self._process.poll()
+        if poll_res is not None:
+            exc_msg = self._returncode_to_env_message(self._process.returncode)
+            raise UnityEnvironmentException(exc_msg)
+
+>>>>>>> tmp
     def close(self):
         """
         Sends a shutdown signal to the unity environment, and closes the socket connection.
@@ -397,6 +438,7 @@ class UnityEnvironment(BaseEnv):
             timeout = self._timeout_wait
         self._loaded = False
         self._communicator.close()
+<<<<<<< HEAD
         if self._proc1 is not None:
             # Wait a bit for the process to shutdown, but kill it if it takes too long
             try:
@@ -410,6 +452,18 @@ class UnityEnvironment(BaseEnv):
                 self._proc1.kill()
             # Set to None so we don't try to close multiple times.
             self._proc1 = None
+=======
+        if self._process is not None:
+            # Wait a bit for the process to shutdown, but kill it if it takes too long
+            try:
+                self._process.wait(timeout=timeout)
+                logger.info(self._returncode_to_env_message(self._process.returncode))
+            except subprocess.TimeoutExpired:
+                logger.info("Environment timed out shutting down. Killing...")
+                self._process.kill()
+            # Set to None so we don't try to close multiple times.
+            self._process = None
+>>>>>>> tmp
 
     @timed
     def _generate_step_input(
@@ -452,7 +506,11 @@ class UnityEnvironment(BaseEnv):
     ) -> UnityOutputProto:
         inputs = UnityInputProto()
         inputs.rl_initialization_input.CopyFrom(init_parameters)
+<<<<<<< HEAD
         return self._communicator.initialize(inputs)
+=======
+        return self._communicator.initialize(inputs, self._poll_process)
+>>>>>>> tmp
 
     @staticmethod
     def _wrap_unity_input(rl_input: UnityRLInputProto) -> UnityInputProto:
@@ -473,3 +531,12 @@ class UnityEnvironment(BaseEnv):
         except Exception:
             # Should generally be a ValueError, but catch everything just in case.
             return None
+<<<<<<< HEAD
+=======
+
+    @staticmethod
+    def _returncode_to_env_message(returncode: int) -> str:
+        signal_name = UnityEnvironment._returncode_to_signal_name(returncode)
+        signal_name = f" ({signal_name})" if signal_name else ""
+        return f"Environment shut down with return code {returncode}{signal_name}."
+>>>>>>> tmp
