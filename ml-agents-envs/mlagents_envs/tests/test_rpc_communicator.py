@@ -1,9 +1,4 @@
 import pytest
-<<<<<<< HEAD
-
-from mlagents_envs.rpc_communicator import RpcCommunicator
-from mlagents_envs.exception import UnityWorkerInUseException
-=======
 from unittest import mock
 
 import grpc
@@ -16,7 +11,6 @@ from mlagents_envs.exception import (
     UnityEnvironmentException,
 )
 from mlagents_envs.communicator_objects.unity_input_pb2 import UnityInputProto
->>>>>>> tmp
 
 
 def test_rpc_communicator_checks_port_on_create():
@@ -43,8 +37,6 @@ def test_rpc_communicator_create_multiple_workers():
     second_comm = RpcCommunicator(worker_id=1)
     first_comm.close()
     second_comm.close()
-<<<<<<< HEAD
-=======
 
 
 @mock.patch.object(grpc, "server")
@@ -88,4 +80,3 @@ def test_rpc_communicator_initialize_callback(mock_impl, mock_grpc_server):
     with pytest.raises(UnityEnvironmentException):
         comm.initialize(input, poll_callback=callback)
     comm.unity_to_external.parent_conn.poll.assert_called()
->>>>>>> tmp
