@@ -1,14 +1,6 @@
 import grpc
 from typing import Optional
 
-<<<<<<< HEAD
-from sys import platform
-import socket
-from multiprocessing import Pipe
-from concurrent.futures import ThreadPoolExecutor
-
-from .communicator import Communicator
-=======
 from multiprocessing import Pipe
 from sys import platform
 import socket
@@ -16,7 +8,6 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from .communicator import Communicator, PollCallback
->>>>>>> tmp
 from mlagents_envs.communicator_objects.unity_to_external_pb2_grpc import (
     UnityToExternalProtoServicer,
     add_UnityToExternalProtoServicer_to_server,
@@ -96,28 +87,11 @@ class RpcCommunicator(Communicator):
         finally:
             s.close()
 
-<<<<<<< HEAD
-    def poll_for_timeout(self):
-=======
     def poll_for_timeout(self, poll_callback: Optional[PollCallback] = None) -> None:
->>>>>>> tmp
         """
         Polls the GRPC parent connection for data, to be used before calling recv.  This prevents
         us from hanging indefinitely in the case where the environment process has died or was not
         launched.
-<<<<<<< HEAD
-        """
-        if not self.unity_to_external.parent_conn.poll(self.timeout_wait):
-            raise UnityTimeOutException(
-                "The Unity environment took too long to respond. Make sure that :\n"
-                "\t The environment does not need user interaction to launch\n"
-                '\t The Agents\' Behavior Parameters > Behavior Type is set to "Default"\n'
-                "\t The environment and the Python interface have compatible versions."
-            )
-
-    def initialize(self, inputs: UnityInputProto) -> UnityOutputProto:
-        self.poll_for_timeout()
-=======
 
         Additionally, a callback can be passed to periodically check the state of the environment.
         This is used to detect the case when the environment dies without cleaning up the connection,
@@ -145,7 +119,6 @@ class RpcCommunicator(Communicator):
         self, inputs: UnityInputProto, poll_callback: Optional[PollCallback] = None
     ) -> UnityOutputProto:
         self.poll_for_timeout(poll_callback)
->>>>>>> tmp
         aca_param = self.unity_to_external.parent_conn.recv().unity_output
         message = UnityMessageProto()
         message.header.status = 200
@@ -154,22 +127,14 @@ class RpcCommunicator(Communicator):
         self.unity_to_external.parent_conn.recv()
         return aca_param
 
-<<<<<<< HEAD
-    def exchange(self, inputs: UnityInputProto) -> Optional[UnityOutputProto]:
-=======
     def exchange(
         self, inputs: UnityInputProto, poll_callback: Optional[PollCallback] = None
     ) -> Optional[UnityOutputProto]:
->>>>>>> tmp
         message = UnityMessageProto()
         message.header.status = 200
         message.unity_input.CopyFrom(inputs)
         self.unity_to_external.parent_conn.send(message)
-<<<<<<< HEAD
-        self.poll_for_timeout()
-=======
         self.poll_for_timeout(poll_callback)
->>>>>>> tmp
         output = self.unity_to_external.parent_conn.recv()
         if output.header.status != 200:
             return None
