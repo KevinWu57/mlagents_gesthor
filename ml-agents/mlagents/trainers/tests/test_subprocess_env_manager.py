@@ -105,6 +105,8 @@ class SubprocessEnvManagerTest(unittest.TestCase):
     @mock.patch(
         "mlagents.trainers.subprocess_env_manager.SubprocessEnvManager.create_worker"
     )
+<<<<<<< HEAD
+=======
     def test_training_behaviors_collects_results_from_all_envs(
         self, mock_create_worker
     ):
@@ -132,6 +134,7 @@ class SubprocessEnvManagerTest(unittest.TestCase):
     @mock.patch(
         "mlagents.trainers.subprocess_env_manager.SubprocessEnvManager.create_worker"
     )
+>>>>>>> tmp
     def test_step_takes_steps_for_all_non_waiting_envs(self, mock_create_worker):
         mock_create_worker.side_effect = create_worker_mock
         manager = SubprocessEnvManager(

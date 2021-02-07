@@ -3,7 +3,11 @@ from unittest import mock
 import os
 
 import numpy as np
+<<<<<<< HEAD
+from mlagents.torch_utils import torch
+=======
 from mlagents.torch_utils import torch, default_device
+>>>>>>> tmp
 from mlagents.trainers.policy.torch_policy import TorchPolicy
 from mlagents.trainers.ppo.optimizer_torch import TorchPPOOptimizer
 from mlagents.trainers.model_saver.torch_model_saver import TorchModelSaver
@@ -69,9 +73,12 @@ def _compare_two_policies(policy1: TorchPolicy, policy2: TorchPolicy) -> None:
     """
     Make sure two policies have the same output for the same input.
     """
+<<<<<<< HEAD
+=======
     policy1.actor_critic = policy1.actor_critic.to(default_device())
     policy2.actor_critic = policy2.actor_critic.to(default_device())
 
+>>>>>>> tmp
     decision_step, _ = mb.create_steps_from_behavior_spec(
         policy1.behavior_spec, num_agents=1
     )
@@ -90,8 +97,12 @@ def _compare_two_policies(policy1: TorchPolicy, policy2: TorchPolicy) -> None:
             tensor_obs, masks=masks, memories=memories
         )
     np.testing.assert_array_equal(
+<<<<<<< HEAD
+        log_probs1.all_discrete_tensor, log_probs2.all_discrete_tensor
+=======
         ModelUtils.to_numpy(log_probs1.all_discrete_tensor),
         ModelUtils.to_numpy(log_probs2.all_discrete_tensor),
+>>>>>>> tmp
     )
 
 

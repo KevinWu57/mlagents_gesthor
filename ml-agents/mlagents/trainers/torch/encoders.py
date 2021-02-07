@@ -179,7 +179,6 @@ class SimpleVisualEncoder(nn.Module):
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
             nn.LeakyReLU(),
         )
-
         self.dense = nn.Sequential(
             linear_layer(
                 self.final_flat,

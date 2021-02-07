@@ -39,7 +39,11 @@ def test_gaussian_distribution(conditional_sigma, tanh_squash):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+<<<<<<< HEAD
+    for prob in log_prob.flatten():
+=======
     for prob in log_prob.flatten().tolist():
+>>>>>>> tmp
         assert prob == pytest.approx(-2, abs=0.1)
 
 
@@ -89,7 +93,11 @@ def test_multi_categorical_distribution():
     dist_insts = gauss_dist(sample_embedding, masks=masks)
     for dist_inst in dist_insts:
         log_prob = dist_inst.all_log_prob()
+<<<<<<< HEAD
+        assert log_prob.flatten()[-1] == pytest.approx(0, abs=0.001)
+=======
         assert log_prob.flatten()[-1].tolist() == pytest.approx(0, abs=0.001)
+>>>>>>> tmp
 
 
 def test_gaussian_dist_instance():
@@ -100,6 +108,13 @@ def test_gaussian_dist_instance():
     )
     action = dist_instance.sample()
     assert action.shape == (1, act_size)
+<<<<<<< HEAD
+    for log_prob in dist_instance.log_prob(torch.zeros((1, act_size))).flatten():
+        # Log prob of standard normal at 0
+        assert log_prob == pytest.approx(-0.919, abs=0.01)
+
+    for ent in dist_instance.entropy().flatten():
+=======
     for log_prob in (
         dist_instance.log_prob(torch.zeros((1, act_size))).flatten().tolist()
     ):
@@ -107,6 +122,7 @@ def test_gaussian_dist_instance():
         assert log_prob == pytest.approx(-0.919, abs=0.01)
 
     for ent in dist_instance.entropy().flatten().tolist():
+>>>>>>> tmp
         # entropy of standard normal at 0, based on 1/2 + ln(sqrt(2pi)sigma)
         assert ent == pytest.approx(1.42, abs=0.01)
 
