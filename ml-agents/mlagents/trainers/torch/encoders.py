@@ -164,9 +164,9 @@ class SimpleVisualEncoder(nn.Module):
         # # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
         # self.mobilenetv2.classifier = nn.Identity()
 
-        # Freeze all parameters in the model
-        for param in self.mobilenetv2.parameters():
-            param.requires_grad = False
+        # # Freeze all parameters in the model
+        # for param in self.mobilenetv2.parameters():
+        #     param.requires_grad = False
         # Replace the classifier layer with a fc layer
         self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
         # Use multiple GPUs if possible
