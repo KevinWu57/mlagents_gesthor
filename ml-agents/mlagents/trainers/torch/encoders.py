@@ -156,8 +156,10 @@ class SimpleVisualEncoder(nn.Module):
         super().__init__()
         self.h_size = output_size # this is the final output size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
-        conv_2_hw = conv_output_shape(conv_1_hw, 4, 2)
-        self.final_flat = 256 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
+        maxpool_1_hw = conv_output_shape(conv_1_hw, 2, 2)
+        conv_2_hw = conv_output_shape(maxpool_1_hw, 4, 2)
+        maxpool_2_hw = conv_output_shape(conv_2_hw, 2, 2)
+        self.final_flat = 256 if initial_channels == 3 else maxpool_2_hw[0] * maxpool_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
         self.resnet18 = models.resnet18(pretrained=True)
@@ -180,8 +182,10 @@ class SimpleVisualEncoder(nn.Module):
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
+            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
+            nn.MaxPool2d(kernel_size=2)
             nn.LeakyReLU(),
         )
         self.dense = nn.Sequential(
