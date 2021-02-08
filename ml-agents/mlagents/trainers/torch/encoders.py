@@ -185,7 +185,7 @@ class SimpleVisualEncoder(nn.Module):
             nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
         )
         self.dense = nn.Sequential(
