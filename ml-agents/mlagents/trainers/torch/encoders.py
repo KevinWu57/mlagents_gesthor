@@ -204,10 +204,11 @@ class SimpleVisualEncoder(nn.Module):
             transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             visual_obs = transform(visual_obs)
             hidden = self.resnet18(visual_obs)
+            return hidden
         else:
             hidden = self.conv_layers(visual_obs)
-        hidden = hidden.reshape(-1, self.final_flat)
-        return self.dense(hidden)
+            hidden = hidden.reshape(-1, self.final_flat)
+            return self.dense(hidden)
 
 
 class NatureVisualEncoder(nn.Module):
