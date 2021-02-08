@@ -161,12 +161,14 @@ class SimpleVisualEncoder(nn.Module):
 
         # Load the pretrained MobileNet v2 model
         self.resnet18 = models.resnet18(pretrained=True)
-        # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
-        self.resnet18.fc = nn.Linear(in_features=2048, out_features=256, bias=True)
 
         # # Freeze all parameters in the model
         for param in self.resnet18.parameters():
             param.requires_grad = False
+
+        # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
+        self.resnet18.fc = nn.Linear(in_features=2048, out_features=256, bias=True)
+        
         # # Replace the classifier layer with a fc layer
         # self.resnet18.classifier[1] = nn.Linear(1280, 256)
         # Use multiple GPUs if possible
