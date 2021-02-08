@@ -166,8 +166,11 @@ class SimpleVisualEncoder(nn.Module):
         for param in self.resnet18.parameters():
             param.requires_grad = False
 
-        # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
-        self.resnet18.fc = nn.Linear(in_features=512, out_features=256, bias=True)
+        # Change the last FC classifier
+        self.resnet18.fc = nn.Sequential(
+            nn.Linear(in_features=512, out_features=256, bias=True),
+            nn.LeakyReLU(),
+        ) 
         
         # # Replace the classifier layer with a fc layer
         # self.resnet18.classifier[1] = nn.Linear(1280, 256)
