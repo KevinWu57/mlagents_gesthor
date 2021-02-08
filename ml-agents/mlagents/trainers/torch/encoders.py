@@ -189,12 +189,13 @@ class SimpleVisualEncoder(nn.Module):
             nn.LeakyReLU(),
         )
         self.dense = nn.Sequential(
-            linear_layer(
-                self.final_flat,
-                self.h_size,
-                kernel_init=Initialization.KaimingHeNormal,
-                kernel_gain= 1.41,  # Use ReLU gain
-            ),
+            # linear_layer(
+            #     self.final_flat,
+            #     self.h_size,
+            #     kernel_init=Initialization.KaimingHeNormal,
+            #     kernel_gain= 1.41,  # Use ReLU gain
+            # ),
+            nn.Linear(self.final_flat, self.h_size)
             nn.LeakyReLU(),
         )
 
