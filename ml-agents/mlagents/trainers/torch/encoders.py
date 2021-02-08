@@ -160,18 +160,18 @@ class SimpleVisualEncoder(nn.Module):
         self.final_flat = 512 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
-        self.mobilenetv2 = models.mobilenet_v2(pretrained=True)
+        self.resnet18 = models.resnet18(pretrained=True)
         # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
-        self.mobilenetv2.classifier = nn.Identity()
+        self.resnet18.fc = nn.Linear(in_features=2048, out_features=256, bias=True)
 
         # # Freeze all parameters in the model
-        for param in self.mobilenetv2.parameters():
+        for param in self.resnet18.parameters():
             param.requires_grad = False
         # # Replace the classifier layer with a fc layer
-        # self.mobilenetv2.classifier[1] = nn.Linear(1280, 256)
+        # self.resnet18.classifier[1] = nn.Linear(1280, 256)
         # Use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
-            self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
+            self.resnet18 = nn.DataParallel(self.resnet18) # TODO: use distributed dataparallel?
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
@@ -201,7 +201,7 @@ class SimpleVisualEncoder(nn.Module):
             # normalize the input tensor
             transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             visual_obs = transform(visual_obs)
-            hidden = self.mobilenetv2(visual_obs)
+            hidden = self.resnet18(visual_obs)
         else:
             hidden = self.conv_layers(visual_obs)
         hidden = hidden.reshape(-1, self.final_flat)
