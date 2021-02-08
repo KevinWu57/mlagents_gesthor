@@ -5,7 +5,7 @@ from mlagents.trainers.torch.layers import linear_layer, Initialization, Swish
 from mlagents.torch_utils import torch, nn
 from mlagents.trainers.torch.model_serialization import exporting_to_onnx
 
-from torchvision import transforms
+from torchvision import transforms, models
 
 
 class Normalizer(nn.Module):
@@ -160,15 +160,15 @@ class SimpleVisualEncoder(nn.Module):
         self.final_flat = 512 if initial_channels == 3 else conv_2_hw[0] * conv_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
-        self.mobilenetv2 = torch.hub.load('pytorch/vision:v0.6.0', 'mobilenet_v2', pretrained=True)
-        # # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
-        # self.mobilenetv2.classifier = nn.Identity()
+        self.mobilenetv2 = models.mobilenet_v2(pretrained=True)
+        # Set the last classifier as empty (the output dimension should be) TODO: maybe just delete the classifier? I have not figure out how to do that yet
+        self.mobilenetv2.classifier = nn.Identity()
 
         # # Freeze all parameters in the model
-        # for param in self.mobilenetv2.parameters():
-        #     param.requires_grad = False
-        # Replace the classifier layer with a fc layer
-        self.mobilenetv2.classifier[1] = nn.Linear(1280, 512)
+        for param in self.mobilenetv2.parameters():
+            param.requires_grad = False
+        # # Replace the classifier layer with a fc layer
+        # self.mobilenetv2.classifier[1] = nn.Linear(1280, 256)
         # Use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
             self.mobilenetv2 = nn.DataParallel(self.mobilenetv2) # TODO: use distributed dataparallel?
