@@ -187,7 +187,6 @@ class SimpleVisualEncoder(nn.Module):
         hidden = hidden.reshape(-1, self.final_flat)
         return self.dense(hidden)
 
-# TODO: add one additional visual encoder instead of modifying on this one
 class ResNet18VisualEncoder(nn.Module):
     """
     ResNet18 archetecture. Network pretrained on ImageNet and extract a feature vector from the network
