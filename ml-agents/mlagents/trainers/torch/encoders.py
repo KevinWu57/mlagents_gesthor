@@ -162,11 +162,11 @@ class SimpleVisualEncoder(nn.Module):
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
-            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
-            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2),
         )
         self.dense = nn.Sequential(
             # linear_layer(
@@ -223,11 +223,11 @@ class ResNet18VisualEncoder(nn.Module):
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
-            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(16, 32, [4, 4], [2, 2]),
-            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2),
         )
         self.dense = nn.Sequential(
             # linear_layer(
