@@ -23,7 +23,7 @@ class ModelUtils:
         EncoderType.SIMPLE: 20,
         EncoderType.NATURE_CNN: 36,
         EncoderType.RESNET: 15,
-        EncoderType.RESNET18: 224,
+        EncoderType.RESNET18: 84,
     }
 
     @staticmethod
