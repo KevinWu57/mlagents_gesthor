@@ -84,6 +84,7 @@ class EncoderType(Enum):
     SIMPLE = "simple"
     NATURE_CNN = "nature_cnn"
     RESNET = "resnet"
+    RESNET18 = "resnet18"
 
 
 class ScheduleType(Enum):

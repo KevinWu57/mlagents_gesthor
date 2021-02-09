@@ -5,6 +5,7 @@ import numpy as np
 from mlagents.trainers.torch.encoders import (
     SimpleVisualEncoder,
     ResNetVisualEncoder,
+    ResNet18VisualEncoder,
     NatureVisualEncoder,
     SmallVisualEncoder,
     VectorInput,
@@ -22,6 +23,7 @@ class ModelUtils:
         EncoderType.SIMPLE: 20,
         EncoderType.NATURE_CNN: 36,
         EncoderType.RESNET: 15,
+        EncoderType.RESNET18: 224,
     }
 
     @staticmethod
@@ -102,6 +104,7 @@ class ModelUtils:
             EncoderType.NATURE_CNN: NatureVisualEncoder,
             EncoderType.RESNET: ResNetVisualEncoder,
             EncoderType.MATCH3: SmallVisualEncoder,
+            EncoderType.RESNET18: ResNet18VisualEncoder,
         }
         return ENCODER_FUNCTION_BY_TYPE.get(encoder_type)
 
