@@ -114,14 +114,14 @@ class ModelSerializer:
         onnx_output_path = f"{output_filepath}.onnx"
         logger.info(f"Converting to {onnx_output_path}")
 
-        # with exporting_to_onnx():
-        #     torch.onnx.export(
-        #         self.policy.actor_critic,
-        #         self.dummy_input,
-        #         onnx_output_path,
-        #         opset_version=SerializationSettings.onnx_opset,
-        #         input_names=self.input_names,
-        #         output_names=self.output_names,
-        #         dynamic_axes=self.dynamic_axes,
-        #     )
+        with exporting_to_onnx():
+            torch.onnx.export(
+                self.policy.actor_critic,
+                self.dummy_input,
+                onnx_output_path,
+                opset_version=SerializationSettings.onnx_opset,
+                input_names=self.input_names,
+                output_names=self.output_names,
+                dynamic_axes=self.dynamic_axes,
+            )
         logger.info(f"Exported {onnx_output_path}")
