@@ -210,10 +210,10 @@ class ResNet18VisualEncoder(nn.Module):
         for param in self.resnet18.parameters():
             param.requires_grad = False
 
-        for module in self.resnet18.modules():
-            if isinstance(module, nn.BatchNorm2d):
-                module.eval()
-                module.momentum = 0 # TODO: not sure if this is correct
+        # for module in self.resnet18.modules():
+        #     if isinstance(module, nn.BatchNorm2d):
+        #         module.eval()
+        #         module.momentum = 0 # TODO: not sure if this is correct
 
         # Change the last FC classifier
         self.resnet18.fc = nn.Sequential(
