@@ -195,28 +195,32 @@ class ResNet18VisualEncoder(nn.Module):
         self, height: int, width: int, initial_channels: int, output_size: int
     ):
         super().__init__()
+        self.channel = initial_channels
         self.h_size = output_size # this is the final output size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
         maxpool_1_hw = conv_output_shape(conv_1_hw, 2, 2)
         conv_2_hw = conv_output_shape(maxpool_1_hw, 4, 2)
         maxpool_2_hw = conv_output_shape(conv_2_hw, 2, 2)
-        self.final_flat = 256 if initial_channels == 3 else maxpool_2_hw[0] * maxpool_2_hw[1] * 32 # the final flatten size of the neural net
+        self.final_flat = 128 if initial_channels == 3 else maxpool_2_hw[0] * maxpool_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
         self.resnet18 = models.resnet18(pretrained=True)
 
-        # # Freeze all parameters in the model
+        # Freeze all parameters in the model
         for param in self.resnet18.parameters():
             param.requires_grad = False
 
+        for module in self.resnet18.modules():
+            if isinstance(module, nn.BatchNorm2d):
+                module.eval()
+                module.momentum = 0 # TODO: not sure if this is correct
+
         # Change the last FC classifier
         self.resnet18.fc = nn.Sequential(
-            nn.Linear(in_features=512, out_features=256, bias=True),
+            nn.Linear(in_features=512, out_features=128, bias=True),
             nn.LeakyReLU(),
         ) 
         
-        # # Replace the classifier layer with a fc layer
-        # self.resnet18.classifier[1] = nn.Linear(1280, 256)
         # Use multiple GPUs if possible
         if torch.cuda.device_count() > 1:
             self.resnet18 = nn.DataParallel(self.resnet18) # TODO: use distributed dataparallel?
@@ -248,7 +252,7 @@ class ResNet18VisualEncoder(nn.Module):
 
         # Only use MobileNet for color images (i.e., images with 3 channels)
         # Depth images will use the default simple network
-        if visual_obs.shape[1]==3:
+        if self.channel == 3:
             # normalize the input tensor
             transform  = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             visual_obs = transform(visual_obs)
