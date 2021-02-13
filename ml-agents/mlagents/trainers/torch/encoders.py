@@ -201,7 +201,7 @@ class ResNet18VisualEncoder(nn.Module):
         maxpool_1_hw = conv_output_shape(conv_1_hw, 2, 2)
         conv_2_hw = conv_output_shape(maxpool_1_hw, 4, 2)
         maxpool_2_hw = conv_output_shape(conv_2_hw, 2, 2)
-        self.final_flat = 128 if initial_channels == 3 else maxpool_2_hw[0] * maxpool_2_hw[1] * 32 # the final flatten size of the neural net
+        self.final_flat = 256 if initial_channels == 3 else maxpool_2_hw[0] * maxpool_2_hw[1] * 32 # the final flatten size of the neural net
 
         # Load the pretrained MobileNet v2 model
         self.resnet18 = models.resnet18(pretrained=True)
