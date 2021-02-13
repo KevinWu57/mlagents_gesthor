@@ -275,8 +275,8 @@ class NatureVisualEncoder(nn.Module):
         conv_2_hw = conv_output_shape(maxpool_1_hw, 4, 2)
         maxpool_2_hw = conv_output_shape(conv_2_hw, 2, 2)
         conv_3_hw = conv_output_shape(maxpool_2_hw, 3, 1)
-        maxpool_3_hw = conv_output_shape(conv_3_hw, 2, 2)
-        self.final_flat = maxpool_3_hw[0] * maxpool_3_hw[1] * 64
+        # maxpool_3_hw = conv_output_shape(conv_3_hw, 2, 2)
+        self.final_flat = conv_3_hw[0] * conv_3_hw[1] * 64
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 32, [8, 8], [4, 4]),
@@ -287,7 +287,7 @@ class NatureVisualEncoder(nn.Module):
             nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(64, 64, [3, 3], [1, 1]),
             nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2),
+            # nn.MaxPool2d(kernel_size=2),
         )
         self.dense = nn.Sequential(
             # linear_layer(
