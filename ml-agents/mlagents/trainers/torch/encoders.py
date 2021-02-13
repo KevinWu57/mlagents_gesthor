@@ -271,14 +271,16 @@ class NatureVisualEncoder(nn.Module):
         super().__init__()
         self.h_size = output_size
         conv_1_hw = conv_output_shape((height, width), 8, 4)
-        conv_2_hw = conv_output_shape(conv_1_hw, 4, 2)
+        maxpool_1_hw = conv_output_shape(conv_1_hw, 2, 2)
+        conv_2_hw = conv_output_shape(maxpool_1_hw, 4, 2)
         maxpool_2_hw = conv_output_shape(conv_2_hw, 2, 2)
-        conv_3_hw = conv_output_shape(conv_2_hw, 3, 1)
-        maxpool_2_hw = conv_output_shape(conv_3_hw, 2, 2)
-        self.final_flat = maxpool_2_hw[0] * maxpool_2_hw[1] * 64
+        conv_3_hw = conv_output_shape(maxpool_2_hw, 3, 1)
+        maxpool_3_hw = conv_output_shape(conv_3_hw, 2, 2)
+        self.final_flat = maxpool_3_hw[0] * maxpool_3_hw[1] * 64
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 32, [8, 8], [4, 4]),
+            nn.MaxPool2d(kernel_size=2),
             nn.LeakyReLU(),
             nn.Conv2d(32, 64, [4, 4], [2, 2]),
             nn.LeakyReLU(),
