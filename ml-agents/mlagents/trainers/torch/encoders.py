@@ -222,8 +222,8 @@ class ResNet18VisualEncoder(nn.Module):
         ) 
         
         # Use multiple GPUs if possible
-        # if torch.cuda.device_count() > 1:
-        #     self.resnet18 = nn.DataParallel(self.resnet18, device_ids=[0,1]) # TODO: use distributed dataparallel?
+        if torch.cuda.device_count() > 1:
+            self.resnet18 = nn.DataParallel(self.resnet18, device_ids=[1,3]) # TODO: use distributed dataparallel?
 
         self.conv_layers = nn.Sequential(
             nn.Conv2d(initial_channels, 16, [8, 8], [4, 4]),
